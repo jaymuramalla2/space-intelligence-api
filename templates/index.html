@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Space Intelligence</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --gold: #f0c060;
+      --dim: rgba(0,0,0,0.55);
+      --card: rgba(10,10,20,0.75);
+      --border: rgba(240,192,96,0.25);
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #000;
+      color: #fff;
+      min-height: 100vh;
+    }
+
+    /* ── HERO ── */
+    #hero {
+      position: relative;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      overflow: hidden;
+    }
+
+    #bg {
+      position: absolute; inset: 0;
+      background-image: url('');
+      background-size: cover;
+      background-position: center;
+      filter: brightness(0.35);
+      transition: background-image 1s ease;
+    }
+
+    /* Subtle star fallback when image loads */
+    #bg::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse at 50% 50%, rgba(20,20,50,0.6) 0%, rgba(0,0,0,0.9) 100%);
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 2;
+      animation: fadeUp 1.2s ease both;
+    }
+
+    .badge {
+      display: inline-block;
+      border: 1px solid var(--gold);
+      color: var(--gold);
+      font-size: 0.7rem;
+      letter-spacing: 0.3em;
+      padding: 5px 16px;
+      border-radius: 20px;
+      margin-bottom: 24px;
+      font-family: 'Orbitron', sans-serif;
+    }
+
+    h1 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: clamp(2.2rem, 6vw, 5rem);
+      font-weight: 900;
+      line-height: 1.1;
+      letter-spacing: 0.04em;
+      margin-bottom: 16px;
+    }
+
+    h1 span { color: var(--gold); }
+
+    .subtitle {
+      font-size: 1rem;
+      color: rgba(255,255,255,0.55);
+      letter-spacing: 0.08em;
+      margin-bottom: 56px;
+      font-weight: 300;
+    }
+
+    /* ── BUTTONS ── */
+    .btn-row {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+
+    .btn {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.75rem;
+      letter-spacing: 0.15em;
+      padding: 14px 36px;
+      border-radius: 4px;
+      cursor: pointer;
+      border: 1px solid;
+      transition: all 0.25s;
+      text-transform: uppercase;
+    }
+
+    .btn-nasa {
+      background: transparent;
+      border-color: var(--gold);
+      color: var(--gold);
+    }
+    .btn-nasa:hover { background: var(--gold); color: #000; }
+
+    .btn-spacex {
+      background: transparent;
+      border-color: rgba(255,255,255,0.4);
+      color: #fff;
+    }
+    .btn-spacex:hover { background: #fff; color: #000; }
+
+    .btn-summary {
+      background: var(--gold);
+      border-color: var(--gold);
+      color: #000;
+      font-weight: 700;
+      padding: 14px 56px;
+    }
+    .btn-summary:hover { opacity: 0.85; transform: translateY(-2px); }
+
+    .scroll-hint {
+      position: absolute;
+      bottom: 32px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: rgba(255,255,255,0.3);
+      font-size: 0.7rem;
+      letter-spacing: 0.2em;
+      animation: pulse 2s infinite;
+    }
+
+    /* ── SECTIONS ── */
+    .section {
+      display: none;
+      min-height: 100vh;
+      padding: 80px 24px;
+      background: #04040f;
+    }
+
+    .section.active { display: block; }
+
+    .section-header {
+      text-align: center;
+      margin-bottom: 56px;
+    }
+
+    .section-header h2 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: clamp(1.5rem, 4vw, 2.5rem);
+      font-weight: 700;
+      letter-spacing: 0.06em;
+    }
+
+    .section-header h2 span { color: var(--gold); }
+
+    .section-header p {
+      color: rgba(255,255,255,0.4);
+      margin-top: 8px;
+      font-size: 0.85rem;
+      letter-spacing: 0.1em;
+    }
+
+    /* ── NASA CARD ── */
+    .nasa-grid {
+      max-width: 1000px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 32px;
+      align-items: start;
+    }
+
+    @media(max-width: 700px) { .nasa-grid { grid-template-columns: 1fr; } }
+
+    .apod-img {
+      width: 100%;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      aspect-ratio: 1;
+      object-fit: cover;
+    }
+
+    .info-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 32px;
+      backdrop-filter: blur(12px);
+    }
+
+    .info-card .label {
+      font-size: 0.65rem;
+      letter-spacing: 0.25em;
+      color: var(--gold);
+      font-family: 'Orbitron', sans-serif;
+      margin-bottom: 8px;
+    }
+
+    .info-card h3 {
+      font-size: 1.4rem;
+      font-weight: 600;
+      margin-bottom: 16px;
+      line-height: 1.3;
+    }
+
+    .info-card p {
+      font-size: 0.88rem;
+      line-height: 1.8;
+      color: rgba(255,255,255,0.65);
+    }
+
+    .date-tag {
+      display: inline-block;
+      background: rgba(240,192,96,0.1);
+      border: 1px solid var(--border);
+      color: var(--gold);
+      font-size: 0.7rem;
+      padding: 4px 12px;
+      border-radius: 20px;
+      margin-bottom: 20px;
+      letter-spacing: 0.1em;
+    }
+
+    /* ── SPACEX CARD ── */
+    .spacex-wrap {
+      max-width: 640px;
+      margin: 0 auto;
+    }
+
+    .stat-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .stat-box {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 24px;
+      text-align: center;
+    }
+
+    .stat-box .val {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--gold);
+      margin-bottom: 6px;
+    }
+
+    .stat-box .key {
+      font-size: 0.7rem;
+      letter-spacing: 0.2em;
+      color: rgba(255,255,255,0.4);
+      text-transform: uppercase;
+    }
+
+    .success-badge {
+      display: inline-block;
+      padding: 6px 18px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+    }
+    .success-badge.yes { background: rgba(80,200,100,0.15); border: 1px solid rgba(80,200,100,0.4); color: #50c864; }
+    .success-badge.no  { background: rgba(255,80,80,0.15);  border: 1px solid rgba(255,80,80,0.4);  color: #ff5050; }
+
+    .watch-btn {
+      display: block;
+      width: 100%;
+      text-align: center;
+      padding: 14px;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--gold);
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.7rem;
+      letter-spacing: 0.2em;
+      text-decoration: none;
+      transition: all 0.2s;
+      margin-top: 16px;
+    }
+    .watch-btn:hover { background: var(--gold); color: #000; }
+
+    /* ── SUMMARY ── */
+    .summary-wrap {
+      max-width: 900px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+
+    @media(max-width: 700px) { .summary-wrap { grid-template-columns: 1fr; } }
+
+    .sum-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 32px;
+    }
+
+    .sum-card .agency {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.65rem;
+      letter-spacing: 0.3em;
+      color: var(--gold);
+      margin-bottom: 20px;
+    }
+
+    .sum-card img {
+      width: 100%;
+      border-radius: 6px;
+      margin-bottom: 16px;
+      aspect-ratio: 16/9;
+      object-fit: cover;
+    }
+
+    /* ── BACK BTN ── */
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      color: rgba(255,255,255,0.4);
+      cursor: pointer;
+      border: none;
+      background: none;
+      margin-bottom: 48px;
+      transition: color 0.2s;
+    }
+    .back-btn:hover { color: var(--gold); }
+
+    /* ── LOADER ── */
+    .loader {
+      text-align: center;
+      padding: 80px;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.7rem;
+      letter-spacing: 0.3em;
+      color: var(--gold);
+      animation: pulse 1.5s infinite;
+    }
+
+    /* ── ANIMATIONS ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(32px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.4; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HERO -->
+  <section id="hero">
+    <div id="bg"></div>
+    <div class="hero-content">
+      <div class="badge">LIVE SPACE DATA</div>
+      <h1>SPACE<br/><span>INTELLIGENCE</span></h1>
+      <p class="subtitle">NASA · SPACEX · REAL-TIME</p>
+      <div class="btn-row">
+        <button class="btn btn-nasa" onclick="loadNASA()">🌌 NASA Today</button>
+        <button class="btn btn-spacex" onclick="loadSpaceX()">🚀 SpaceX Latest</button>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-summary" onclick="loadSummary()">⚡ Space Summary</button>
+      </div>
+    </div>
+    <div class="scroll-hint">▼ SELECT A MODULE</div>
+  </section>
+
+  <!-- NASA SECTION -->
+  <section id="sec-nasa" class="section">
+    <button class="back-btn" onclick="goHome()">← BACK TO HOME</button>
+    <div class="section-header">
+      <h2>NASA <span>ASTRONOMY</span> PICTURE</h2>
+      <p>TODAY'S FEATURED IMAGE FROM NASA APOD</p>
+    </div>
+    <div id="nasa-content"><div class="loader">FETCHING FROM NASA...</div></div>
+  </section>
+
+  <!-- SPACEX SECTION -->
+  <section id="sec-spacex" class="section">
+    <button class="back-btn" onclick="goHome()">← BACK TO HOME</button>
+    <div class="section-header">
+      <h2>SPACEX <span>LATEST</span> LAUNCH</h2>
+      <p>MOST RECENT MISSION DATA</p>
+    </div>
+    <div id="spacex-content"><div class="loader">FETCHING FROM SPACEX...</div></div>
+  </section>
+
+  <!-- SUMMARY SECTION -->
+  <section id="sec-summary" class="section">
+    <button class="back-btn" onclick="goHome()">← BACK TO HOME</button>
+    <div class="section-header">
+      <h2>SPACE <span>SUMMARY</span></h2>
+      <p>NASA + SPACEX COMBINED OVERVIEW</p>
+    </div>
+    <div id="summary-content"><div class="loader">COMBINING DATA...</div></div>
+  </section>
+
+<script>
+  // Load NASA bg image on page load
+  async function loadHeroBg() {
+    try {
+      const res = await fetch('/space/today');
+      const d = await res.json();
+      if (d.image_url) {
+        document.getElementById('bg').style.backgroundImage = `url('${d.image_url}')`;
+      }
+    } catch(e) {}
+  }
+  loadHeroBg();
+
+  function showSection(id) {
+    document.getElementById('hero').style.display = 'none';
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    window.scrollTo(0, 0);
+  }
+
+  function goHome() {
+    document.getElementById('hero').style.display = 'flex';
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  }
+
+  // ── NASA ──
+  async function loadNASA() {
+    showSection('sec-nasa');
+    const box = document.getElementById('nasa-content');
+    box.innerHTML = '<div class="loader">FETCHING FROM NASA...</div>';
+    const d = await fetch('/space/today').then(r => r.json());
+    box.innerHTML = `
+      <div class="nasa-grid">
+        <img class="apod-img" src="${d.image_url}" alt="${d.title}" onerror="this.style.display='none'"/>
+        <div class="info-card">
+          <div class="label">ASTRONOMY PICTURE OF THE DAY</div>
+          <div class="date-tag">📅 ${d.date}</div>
+          <h3>${d.title}</h3>
+          <p>${d.explanation}</p>
+        </div>
+      </div>`;
+  }
+
+  // ── SPACEX ──
+  async function loadSpaceX() {
+    showSection('sec-spacex');
+    const box = document.getElementById('spacex-content');
+    box.innerHTML = '<div class="loader">FETCHING FROM SPACEX...</div>';
+    const d = await fetch('/spacex/latest').then(r => r.json());
+    const success = d.success;
+    box.innerHTML = `
+      <div class="spacex-wrap">
+        <div class="info-card" style="margin-bottom:16px">
+          <div class="label">MISSION NAME</div>
+          <h3>${d.mission_name}</h3>
+          <span class="success-badge ${success ? 'yes' : 'no'}">${success ? '✓ SUCCESSFUL' : '✗ FAILED'}</span>
+        </div>
+        <div class="stat-grid">
+          <div class="stat-box">
+            <div class="val">${d.date.split('T')[0]}</div>
+            <div class="key">Launch Date</div>
+          </div>
+          <div class="stat-box">
+            <div class="val">${d.date.split('T')[1].slice(0,5)}</div>
+            <div class="key">Launch Time UTC</div>
+          </div>
+        </div>
+        ${d.details ? `<div class="info-card"><div class="label">MISSION DETAILS</div><p>${d.details}</p></div>` : ''}
+        ${d.webcast ? `
+  <div style="margin-top:16px;border-radius:8px;overflow:hidden;border:1px solid var(--border)">
+    <iframe 
+      width="100%" 
+      height="320" 
+      src="${d.webcast.replace('youtu.be/', 'www.youtube.com/embed/').replace('watch?v=', 'embed/')}" 
+      frameborder="0" 
+      allowfullscreen>
+    </iframe>
+  </div>` : ''}
+      </div>`;
+  }
+
+  // ── SUMMARY ──
+  async function loadSummary() {
+    showSection('sec-summary');
+    const box = document.getElementById('summary-content');
+    box.innerHTML = '<div class="loader">COMBINING DATA...</div>';
+    const d = await fetch('/space/summary').then(r => r.json());
+    box.innerHTML = `
+      <div class="summary-wrap">
+        <div class="sum-card">
+          <div class="agency">🌌 NASA · APOD</div>
+          <img src="${d.nasa.image_url}" alt="${d.nasa.title}" onerror="this.style.display='none'"/>
+          <div class="date-tag">📅 ${d.nasa.date}</div>
+          <h3 style="font-size:1.1rem;margin-top:8px">${d.nasa.title}</h3>
+        </div>
+        <div class="sum-card">
+          <div class="agency">🚀 SPACEX · LATEST LAUNCH</div>
+          <div class="stat-box" style="margin-bottom:16px">
+            <div class="val">${d.spacex.mission_name}</div>
+            <div class="key">Mission</div>
+          </div>
+          <div class="stat-grid">
+            <div class="stat-box">
+              <div class="val" style="font-size:1rem">${d.spacex.date.split('T')[0]}</div>
+              <div class="key">Date</div>
+            </div>
+            <div class="stat-box">
+              <div class="val" style="font-size:1rem">${d.spacex.success ? '✓' : '✗'}</div>
+              <div class="key">Success</div>
+            </div>
+          </div>
+        </div>
+      </div>`;
+  }
+</script>
+</body>
+</html>
